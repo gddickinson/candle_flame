@@ -8,11 +8,12 @@ All rendering is delegated to :class:`renderer.Renderer`.
 from __future__ import annotations
 import logging
 import math
+import os
 import time as _time
 
 import numpy as np
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
-from PyQt5.QtWidgets import QOpenGLWidget
+from PyQt5.QtWidgets import QOpenGLWidget, QFileDialog
 
 from .camera import OrbitCamera, perspective
 from .geometry import build_candle_meshes
@@ -186,3 +187,19 @@ class CandleCanvas(QOpenGLWidget):
     def set_candle_color(self, r: float, g: float, b: float):
         """Set the candle wax colour (0–1 floats)."""
         self.candle_rgb = (r, g, b)
+
+    def screenshot(self, path: str | None = None) -> str | None:
+        """Capture the current frame and save as PNG.
+
+        If *path* is ``None`` a file dialog is shown.
+        Returns the saved path, or ``None`` if cancelled.
+        """
+        if path is None:
+            path, _ = QFileDialog.getSaveFileName(
+                self, "Save Screenshot", "candle_screenshot.png",
+                "PNG Image (*.png);;JPEG Image (*.jpg)")
+        if not path:
+            return None
+        img = self.grabFramebuffer()
+        img.save(path)
+        return path

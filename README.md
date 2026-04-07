@@ -5,6 +5,16 @@ A real-time particle-based candle flame simulation built with Python, OpenGL, an
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
+![Full Window](screenshots/full_window.png)
+
+---
+
+## Gallery
+
+| Default Flame | High Intensity | Wind Effect | Burgundy Candle |
+|:---:|:---:|:---:|:---:|
+| ![Default](screenshots/default_flame.png) | ![Intense](screenshots/high_intensity.png) | ![Wind](screenshots/wind_effect.png) | ![Burgundy](screenshots/burgundy_candle.png) |
+
 ---
 
 ## Features
@@ -74,6 +84,7 @@ python run_candle.py
 | Show Smoke | Toggle smoke particle rendering |
 | Pause / Resume | Freeze particle simulation |
 | Blow Out | Set intensity to zero |
+| Screenshot | Save current frame as PNG/JPEG |
 
 ---
 
@@ -231,6 +242,24 @@ class FlameParams:
 ### Modifying the colour ramp
 
 Edit the temperature thresholds and `mix()` endpoints in `FLAME_F` inside `shaders.py`.
+
+---
+
+## Screenshots
+
+Click the **Screenshot** button in the Actions panel to save the current frame as a PNG or JPEG via a file dialog. You can also capture programmatically:
+
+```python
+canvas.screenshot("/path/to/output.png")
+```
+
+To regenerate the gallery images, run the included script:
+
+```bash
+python candle/take_screenshots.py
+```
+
+This launches the simulator, cycles through several configurations, and saves five screenshots to `candle/screenshots/`.
 
 ---
 

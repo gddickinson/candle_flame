@@ -214,16 +214,23 @@ class ControlPanel(QWidget):
         # ACTIONS
         # ══════════════════════════════════════════════════════════════
         ag = QGroupBox("Actions")
-        al = QHBoxLayout(ag)
+        al = QVBoxLayout(ag)
+        row1 = QHBoxLayout()
 
         self._pause = QPushButton("⏸  Pause")
         self._pause.setCheckable(True)
         self._pause.toggled.connect(self._on_pause)
-        al.addWidget(self._pause)
+        row1.addWidget(self._pause)
 
         blow = QPushButton("💨  Blow Out")
         blow.clicked.connect(lambda: self._intensity.setValue(0))
-        al.addWidget(blow)
+        row1.addWidget(blow)
+
+        al.addLayout(row1)
+
+        snap = QPushButton("📸  Screenshot")
+        snap.clicked.connect(lambda: self.canvas.screenshot())
+        al.addWidget(snap)
 
         layout.addWidget(ag)
 
