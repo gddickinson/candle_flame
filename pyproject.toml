@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "candle-flame"
+version = "0.1.0"
+description = "3D particle-based candle flame simulator using OpenGL and PyQt5"
+requires-python = ">=3.9"
+dependencies = [
+    "PyQt5>=5.15",
+    "PyOpenGL>=3.1",
+    "numpy>=1.24",
+]
+
+[project.scripts]
+candle-flame = "candle.app:main"
