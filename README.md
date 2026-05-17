@@ -278,3 +278,7 @@ This launches the simulator, cycles through several configurations, and saves fi
 ## License
 
 MIT
+
+
+---
+*Built with AI assistance from [Claude (Anthropic)](https://claude.com/).*
