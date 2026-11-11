@@ -46,3 +46,17 @@ Each fix has its own "Fix ..." commit and a regression test that failed before t
 Checks re-run: `pytest tests` 36 passed (`test_web.py` 15); node 11 + 7 passed; screenshots.py static (6 routes) and
 live server (4 routes) all ok with no phone overflow; README shots regenerated. Every file I added is under 500
 lines; the existing `jsx/candle_flame.jsx` (979 lines, an unused prototype) was already over the limit.
+
+## 2026-11-11 -- Light and glow fade with the flame (approved by George)
+
+- `ddaf872` **Fix candle light and glow staying on after Blow Out.** `CandleSim` keeps a light level from 0 to 1. It
+  ramps linearly to 0 over `LIGHT_FADE_S = 0.9` s (the longest flame-particle life) after Blow Out, and back to 1 on
+  relight. `light_intensity(eff) = light * (1 + eff*1.5)` is exactly the old value while lit, so the lit look is
+  unchanged. `canvas.paintGL` and the web view pass it to the renderer, and the glow alpha (`min(0.2, light*0.06)`)
+  follows. Blown out, only the ambient light remains. The JS engine has the same logic; reference runs now record the
+  light, the fixtures were regenerated, and Python and JS are still bit-identical (the "windy" run ends at light 0).
+- Regression tests failed first: `tests/test_light_fade.py` (3, including `CandleCanvas.paintGL` with a stubbed
+  renderer, offscreen) and a new node test.
+- Checks: `pytest tests` 39 passed (`test_web.py` 15); node 12 + 7 passed; screenshots.py static (6 routes) and live
+  server (4 routes) all ok with no phone overflow; README shots regenerated. A Playwright check confirmed a dark scene
+  after Blow Out and the normal look on relight.
