@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { rng } from './core.js';
 import { fbm } from './flame_noise.js';
-import { DEFAULT_PARAMS, FlameSystem, flickerMod } from './flame_engine.js';
+import { CandleSim, DEFAULT_PARAMS, FlameSystem, flickerMod } from './flame_engine.js';
 import { runCase, compare } from './flame_reference.js';
 
 const F = JSON.parse(readFileSync(new URL('../../../tests/fixtures/flame_reference.json', import.meta.url)));
@@ -58,6 +58,19 @@ ok('emit only fills dead slots; update cools and kills', () => {
   fs.temp.forEach((t, i) => assert.ok(t <= t0[i]));
   for (let i = 0; i < 100; i++) fs.update(0.016, 0.7, 0, 0, 0.5);
   assert.equal(fs.alive(), 0);
+});
+
+ok('Blow Out (intensity 0) extinguishes the flame; raising the intensity relights it', () => {
+  const sim = new CandleSim({}, { flame: rng(1), smoke: rng(2), flicker: rng(3) });
+  const burn = s => { for (let i = 0; i < Math.round(s * 60); i++) sim.step(1 / 60); };
+  burn(1); assert.ok(sim.flame.alive() > 50);
+  sim.params.intensity = 0;
+  assert.equal(sim.effectiveIntensity(), 0);
+  burn(1); assert.equal(sim.flame.alive(), 0, 'flame still burning after Blow Out');
+  sim.params.intensity = 0.7;
+  burn(0.5); assert.ok(sim.flame.alive() > 50, 'did not relight');
+  const low = new CandleSim({ intensity: 0.01, flicker: 1 }, { flicker: () => 0 });
+  assert.equal(low.effectiveIntensity(), 0.05);
 });
 
 console.log(`flame_engine: ${n} tests passed`);

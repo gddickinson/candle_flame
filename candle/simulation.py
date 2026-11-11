@@ -42,8 +42,15 @@ class CandleSim:
         self.smoke_accum = 0.0
 
     def effective_intensity(self) -> float:
-        """Intensity modulated by flicker (draws one random number)."""
+        """Intensity modulated by flicker (draws one random number).
+
+        Flicker never takes a burning candle below 0.05, but intensity 0
+        (Blow Out) returns 0: nothing is emitted and the remaining flame
+        particles shrink to nothing, until the intensity is raised again.
+        """
         p = self.params
+        if p.intensity <= 0:
+            return 0.0
         mod = flicker_mod(self.time * 1000, p.flicker, self.random())
         return max(0.05, p.intensity * mod)
 

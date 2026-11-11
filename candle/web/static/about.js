@@ -26,8 +26,9 @@ route('about', async () => {
   </ul>
   <p><b>Flicker</b> is a sum of three sine waves plus a random term, scaled by the Flicker slider:</p>
   <p class="eq">1 + (sin(0.008t)·0.1 + sin(0.019t)·0.07 + sin(0.037t)·0.05 + (rand − 0.5)·0.15) × flicker</p>
-  <p>It modulates both the emission rate and the point light on the candle. The effective intensity never drops below
-  0.05, so <b>Blow Out</b> (intensity 0) leaves a tiny ember flame, as in the desktop app.</p>
+  <p>It modulates both the emission rate and the point light on the candle. While the candle burns, flicker never takes
+  the effective intensity below 0.05; <b>Blow Out</b> (intensity 0) stops emission and the flame vanishes, leaving
+  the smoke to drift away. Raise the intensity to relight it.</p>
 
   <h2>The rendering</h2>
   <p>Four shader programs, ported from GLSL 1.20 to WebGL: <b>Phong</b> for the candle body, melted wax rim, wick and

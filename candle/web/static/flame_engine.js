@@ -143,8 +143,10 @@ export class CandleSim {
     this.time = 0; this.emit_accum = 0; this.smoke_accum = 0;
   }
 
+  // Flicker floor of 0.05 while burning; intensity 0 (Blow Out) gives 0, extinguishing the flame until relit.
   effectiveIntensity() {
     const p = this.params;
+    if (p.intensity <= 0) return 0.0;
     return Math.max(0.05, p.intensity * flickerMod(this.time * 1000, p.flicker, this.random()));
   }
 
