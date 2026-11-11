@@ -259,7 +259,7 @@ To regenerate the gallery images, run the included script:
 python candle/take_screenshots.py
 ```
 
-This launches the simulator, cycles through several configurations, and saves five screenshots to `candle/screenshots/`.
+This launches the simulator, cycles through several configurations, and saves five screenshots to `screenshots/` (the gallery images above).
 
 ---
 

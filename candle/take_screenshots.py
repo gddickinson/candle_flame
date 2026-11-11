@@ -23,7 +23,8 @@ from PyQt5.QtGui import QSurfaceFormat
 from candle.app import DARK_STYLE
 from candle.main_window import MainWindow
 
-SHOTS_DIR = os.path.join(os.path.dirname(__file__), "screenshots")
+# Repo-root screenshots/ (the README gallery), not candle/screenshots/
+SHOTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "screenshots")
 os.makedirs(SHOTS_DIR, exist_ok=True)
 
 
