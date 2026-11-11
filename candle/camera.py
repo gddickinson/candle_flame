@@ -35,7 +35,10 @@ class OrbitCamera:
                        min(self.max_phi, self.phi + dy * 0.006))
 
     def zoom(self, delta: float):
-        """Scroll-wheel zoom (positive = closer)."""
+        """Scroll-wheel zoom: positive *delta* moves the camera away, negative closer.
+
+        The canvas passes the negated wheel delta, so scrolling up zooms in.
+        """
         self.distance = max(self.min_dist,
                             min(self.max_dist, self.distance + delta * 0.001))
 

@@ -64,6 +64,16 @@ def test_camera_zoom():
     assert cam.distance <= cam.max_dist
 
 
+def test_zoom_direction():
+    """Positive delta moves the camera away, negative closer (see OrbitCamera.zoom)."""
+    from candle.camera import OrbitCamera
+    cam = OrbitCamera()
+    d0 = cam.distance
+    cam.zoom(120)
+    assert cam.distance > d0
+    cam.zoom(-240)
+    assert cam.distance < d0
+
 if __name__ == "__main__":
     test_orbit_camera_init()
     test_orbit_camera_eye()
