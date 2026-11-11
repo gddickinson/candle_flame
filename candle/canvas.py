@@ -1,24 +1,24 @@
 """
 QOpenGLWidget canvas for the 3D candle flame.
 
-Owns the animation timer, orbit-camera mouse handling, particle
-emission/update cycle, and per-frame flicker modulation.
-All rendering is delegated to :class:`renderer.Renderer`.
+Owns the animation timer and orbit-camera mouse handling.  The flicker,
+particle emission and physics step live in :class:`simulation.CandleSim`
+(Qt-free, shared with the web app); all rendering is delegated to
+:class:`renderer.Renderer`.
 """
 from __future__ import annotations
 import logging
-import math
-import os
 import time as _time
 
-import numpy as np
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 from PyQt5.QtWidgets import QOpenGLWidget, QFileDialog
 
 from .camera import OrbitCamera, perspective
 from .geometry import build_candle_meshes
-from .particles import FlameSystem, SmokeSystem, FlameParams
+from .particles import FlameParams
 from .renderer import Renderer
+from .simulation import CandleSim
+from .ui_specs import DEFAULT_AMBIENT, DEFAULT_CANDLE_COLOR
 
 log = logging.getLogger(__name__)
 
@@ -33,19 +33,17 @@ class CandleCanvas(QOpenGLWidget):
         self.params = params or FlameParams()
         self.camera = OrbitCamera()
         self._renderer = Renderer()
-        self.flame = FlameSystem(self.params.max_particles)
-        self.smoke = SmokeSystem(self.params.max_smoke)
+        self.sim = CandleSim(self.params)
+        self.flame = self.sim.flame
+        self.smoke = self.sim.smoke
 
         # Public state  (controls.py reads/writes these directly)
         self.paused = False
         self.show_smoke = True
-        self.ambient = 0.15
-        self.candle_rgb: tuple[float, float, float] = (0.96, 0.94, 0.88)
+        self.ambient = DEFAULT_AMBIENT
+        self.candle_rgb: tuple[float, float, float] = DEFAULT_CANDLE_COLOR
 
         # Internal
-        self._time = 0.0
-        self._emit_accum = 0.0
-        self._smoke_accum = 0.0
         self._frame_times: list[float] = []
         self._last_time = _time.perf_counter()
         self._dragging = False
@@ -80,15 +78,7 @@ class CandleCanvas(QOpenGLWidget):
         eye  = self.camera.eye
 
         # Flicker modulates the point-light intensity
-        p = self.params
-        t_ms = self._time * 1000
-        flicker_mod = 1.0 + (
-            math.sin(t_ms * 0.008) * 0.1 +
-            math.sin(t_ms * 0.019) * 0.07 +
-            math.sin(t_ms * 0.037) * 0.05 +
-            (np.random.random() - 0.5) * 0.15
-        ) * p.flicker
-        eff = max(0.05, p.intensity * flicker_mod)
+        eff = self.sim.effective_intensity()
 
         self._renderer.render(
             view, proj, eye,
@@ -121,36 +111,8 @@ class CandleCanvas(QOpenGLWidget):
             self.update()
             return
 
-        self._time += dt
-        p = self.params
-
-        # Flicker
-        t_ms = self._time * 1000
-        flicker_mod = 1.0 + (
-            math.sin(t_ms * 0.008) * 0.1 +
-            math.sin(t_ms * 0.019) * 0.07 +
-            math.sin(t_ms * 0.037) * 0.05 +
-            (np.random.random() - 0.5) * 0.15
-        ) * p.flicker
-        eff = max(0.05, p.intensity * flicker_mod)
-        wx, wz, turb = p.wind_x, p.wind_z, p.turbulence
-
-        # Emit flame particles
-        self._emit_accum += p.emit_rate * eff * dt * 30
-        while self._emit_accum >= 1:
-            self.flame.emit(1, eff, wx, wz)
-            self._emit_accum -= 1
-
-        # Emit smoke
-        if self.show_smoke:
-            self._smoke_accum += p.smoke_rate * dt * 30
-            while self._smoke_accum >= 1:
-                self.smoke.emit(1, 0.25 * eff, wx, wz)
-                self._smoke_accum -= 1
-
-        # Step physics
-        self.flame.update(dt, eff, wx, wz, turb)
-        self.smoke.update(dt, wx, wz)
+        # Flicker, emission and physics (simulation.CandleSim)
+        self.sim.step(dt, self.show_smoke)
 
         self.update()  # trigger paintGL
 

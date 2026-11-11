@@ -3,3 +3,5 @@
 candle/.DS_Store
 .DS_Store
 /tests/__pycache__
+/site/
+__pycache__/

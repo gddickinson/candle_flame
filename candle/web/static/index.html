@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candle Flame Simulator</title>
+<meta name="description" content="A real-time particle-based candle flame simulation: 800 temperature-mapped flame particles driven by a 3D turbulent noise field, running live in the browser.">
+<link rel="icon" href="static/icon.svg">
+<link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" href="static/style_app.css">
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<header class="top">
+  <a class="brand" href="#/"><span class="mark"></span>Candle Flame</a>
+  <nav class="groups">
+    <a href="#/candle" data-nav="candle">Candle</a>
+    <a href="#/verify" data-nav="verify">Verify</a>
+    <a href="#/about" data-nav="about">About</a>
+  </nav>
+  <div class="right"><a class="small mute" href="https://github.com/gddickinson/candle_flame" target="_blank" rel="noopener">GitHub</a></div>
+</header>
+<main id="app" tabindex="-1"></main>
+<footer class="foot">Candle Flame Simulator · <a href="https://github.com/gddickinson/candle_flame">source on GitHub</a> · <span id="mode"></span></footer>
+<script type="module" src="static/main.js"></script>
+</body>
+</html>

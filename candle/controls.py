@@ -13,21 +13,9 @@ from PyQt5.QtWidgets import (
     QPushButton, QScrollArea, QSlider, QVBoxLayout, QWidget,
 )
 from .canvas import CandleCanvas
-
-# ── colour presets ────────────────────────────────────────────────────
-
-CANDLE_COLORS: dict[str, tuple[float, float, float]] = {
-    "Ivory":      (0.96, 0.94, 0.88),
-    "Warm White": (0.93, 0.86, 0.75),
-    "Honey":      (0.83, 0.65, 0.25),
-    "Burgundy":   (0.42, 0.08, 0.12),
-    "Forest":     (0.10, 0.23, 0.10),
-    "Navy":       (0.10, 0.10, 0.23),
-    "Lavender":   (0.56, 0.50, 0.69),
-    "Terracotta": (0.69, 0.33, 0.19),
-    "Black":      (0.08, 0.08, 0.08),
-    "Rose":       (0.75, 0.44, 0.50),
-}
+# Colour presets and slider specs live in the Qt-free ui_specs module
+# (shared with the web app); CANDLE_COLORS is re-exported here.
+from .ui_specs import CANDLE_COLORS, SLIDER_BY_KEY, slider_args  # noqa: F401
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -114,24 +102,24 @@ class ControlPanel(QWidget):
         fg = QGroupBox("Flame")
         fl = QVBoxLayout(fg)
 
-        self._intensity = LSlider("Intensity", 0, 100, 70, "%")
+        self._intensity = LSlider(*slider_args("intensity"))
         self._intensity.valueChanged.connect(
-            lambda v: setattr(self.params, "intensity", v / 100))
+            lambda v: setattr(self.params, "intensity", v / SLIDER_BY_KEY["intensity"].scale))
         fl.addWidget(self._intensity)
 
-        self._flicker = LSlider("Flicker", 0, 100, 50, "%")
+        self._flicker = LSlider(*slider_args("flicker"))
         self._flicker.valueChanged.connect(
-            lambda v: setattr(self.params, "flicker", v / 100))
+            lambda v: setattr(self.params, "flicker", v / SLIDER_BY_KEY["flicker"].scale))
         fl.addWidget(self._flicker)
 
-        self._turb = LSlider("Turbulence", 0, 100, 50, "%")
+        self._turb = LSlider(*slider_args("turbulence"))
         self._turb.valueChanged.connect(
-            lambda v: setattr(self.params, "turbulence", v / 100))
+            lambda v: setattr(self.params, "turbulence", v / SLIDER_BY_KEY["turbulence"].scale))
         fl.addWidget(self._turb)
 
-        self._emit = LSlider("Emit Rate", 2, 30, 12)
+        self._emit = LSlider(*slider_args("emit_rate"))
         self._emit.valueChanged.connect(
-            lambda v: setattr(self.params, "emit_rate", float(v)))
+            lambda v: setattr(self.params, "emit_rate", v / SLIDER_BY_KEY["emit_rate"].scale))
         fl.addWidget(self._emit)
 
         layout.addWidget(fg)
@@ -142,14 +130,14 @@ class ControlPanel(QWidget):
         wg = QGroupBox("Wind")
         wl = QVBoxLayout(wg)
 
-        self._wx = LSlider("East ↔ West", -50, 50, 0)
+        self._wx = LSlider(*slider_args("wind_x"))
         self._wx.valueChanged.connect(
-            lambda v: setattr(self.params, "wind_x", v / 50))
+            lambda v: setattr(self.params, "wind_x", v / SLIDER_BY_KEY["wind_x"].scale))
         wl.addWidget(self._wx)
 
-        self._wz = LSlider("North ↔ South", -50, 50, 0)
+        self._wz = LSlider(*slider_args("wind_z"))
         self._wz.valueChanged.connect(
-            lambda v: setattr(self.params, "wind_z", v / 50))
+            lambda v: setattr(self.params, "wind_z", v / SLIDER_BY_KEY["wind_z"].scale))
         wl.addWidget(self._wz)
 
         layout.addWidget(wg)
@@ -186,9 +174,9 @@ class ControlPanel(QWidget):
         sg = QGroupBox("Scene")
         sl = QVBoxLayout(sg)
 
-        self._amb = LSlider("Ambient Light", 0, 50, 15, "%")
+        self._amb = LSlider(*slider_args("ambient"))
         self._amb.valueChanged.connect(
-            lambda v: setattr(self.canvas, "ambient", v / 100))
+            lambda v: setattr(self.canvas, "ambient", v / SLIDER_BY_KEY["ambient"].scale))
         sl.addWidget(self._amb)
 
         self._auto = QCheckBox("Auto-Rotate")
@@ -197,9 +185,9 @@ class ControlPanel(QWidget):
             lambda v: setattr(self.canvas.camera, "auto_rotate", v))
         sl.addWidget(self._auto)
 
-        self._rspd = LSlider("Rotate Speed", 5, 100, 15)
+        self._rspd = LSlider(*slider_args("auto_speed"))
         self._rspd.valueChanged.connect(
-            lambda v: setattr(self.canvas.camera, "auto_speed", v / 100))
+            lambda v: setattr(self.canvas.camera, "auto_speed", v / SLIDER_BY_KEY["auto_speed"].scale))
         sl.addWidget(self._rspd)
 
         self._smk = QCheckBox("Show Smoke")

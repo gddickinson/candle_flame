@@ -218,7 +218,7 @@ Typical performance on a modern system:
 
 ### Adding wax colours
 
-Edit the `CANDLE_COLORS` dict in `controls.py`:
+Edit the `CANDLE_COLORS` dict in `ui_specs.py` (shared by the desktop panel and the web app):
 
 ```python
 CANDLE_COLORS["Ocean"] = (0.15, 0.35, 0.55)
@@ -260,6 +260,43 @@ python candle/take_screenshots.py
 ```
 
 This launches the simulator, cycles through several configurations, and saves five screenshots to `candle/screenshots/`.
+
+---
+
+## Web app and GitHub Pages site
+
+The candle also runs in the browser: **https://gddickinson.github.io/candle_flame/** (once Pages is enabled).
+The static site *is* the simulator: `particles.py`, `noise.py` and `simulation.py` are ported to JavaScript
+(`candle/web/static/flame_engine.js`, `flame_noise.js`) and the four GLSL programs to WebGL (`flame_gl.js`), with the
+same controls as the desktop panel: intensity, flicker, turbulence, emit rate, wind, wax colours, ambient light,
+auto-rotate, smoke, pause, blow out and screenshot. A **Verify** page replays seeded runs of the Python code in the
+browser and compares every float32 particle value (they are identical).
+
+| Home | Candle | Python vs JavaScript |
+|:---:|:---:|:---:|
+| ![Home](docs/img/home.png) | ![Candle](docs/img/candle.png) | ![Verify](docs/img/verify.png) |
+
+### Run the web app
+
+```bash
+pip install -r requirements-web.txt
+python run_web.py                    # http://127.0.0.1:8145
+```
+
+The local server (FastAPI) serves the same front end plus a small JSON API read from the package: `/api/defaults`
+(FlameParams, sliders and wax colours from `ui_specs.py`, camera defaults) and `/api/reference` (seeded runs of
+`CandleSim`).
+
+### Static site, tests
+
+```bash
+python scripts/build_static.py       # exports the site to site/ (published by .github/workflows/pages.yml on push to main)
+python -m pytest -q tests            # includes tests/test_web.py, which also runs the node tests of the JS port
+python scripts/make_js_fixtures.py   # regenerate tests/fixtures/flame_reference.json after changing the physics
+python scripts/screenshots.py --static "" candle verify about   # browser smoke test (Playwright)
+```
+
+One-time setup for publishing: repository Settings → Pages → Source: "GitHub Actions".
 
 ---
 

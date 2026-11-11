@@ -1,0 +1,55 @@
+/* Candle Flame accent palette (flame amber / ember red / hot-core blue-white) and page styles. Shared theme: style.css. */
+:root { --accent:#ffb43a; --accent2:#ff5a2e; --accent3:#9ec9ff; --glow:rgba(255,180,58,.16); }
+button, .btn { color:#1a0c02; }
+.seg button.on { color:#1a0c02; }
+
+/* home */
+.home-hero { display:grid; grid-template-columns:1fr 300px; gap:28px; align-items:center; }
+.hero-candle { height:420px; border-radius:10px; overflow:hidden; border:1px solid var(--line); background:#050403;
+  box-shadow:0 0 50px var(--glow); }
+.hero-candle canvas, .candle-stage canvas { display:block; width:100%; height:100%; touch-action:none; cursor:grab; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid var(--line); border-radius:20px;
+  color:var(--ink); font-size:14px; background:rgba(12,16,32,.8); }
+.chip:hover { border-color:var(--accent); text-decoration:none; }
+.dot { display:inline-block; width:16px; height:16px; border-radius:50%; border:1px solid #555; }
+.door.a { border-top:2px solid var(--accent); } .door.b { border-top:2px solid var(--accent2); } .door.c { border-top:2px solid var(--accent3); }
+.ramp { height:16px; border-radius:4px; border:1px solid var(--line); max-width:520px; }
+.ramp-scale { display:flex; justify-content:space-between; max-width:520px; font:12px var(--mono); color:var(--mute); }
+
+/* candle page */
+.candle-page { display:grid; grid-template-columns:minmax(260px, 1fr) 320px; gap:20px; align-items:start; }
+.candle-col { position:sticky; top:84px; }
+.candle-stage { height:calc(100vh - 170px); min-height:420px; max-height:860px; border-radius:10px; overflow:hidden;
+  border:1px solid var(--line); background:#050403; box-shadow:0 0 60px var(--glow); }
+.candle-panel { margin:0; }
+.grp { border-top:1px solid var(--line); padding:4px 0; }
+.grp:first-child { border-top:0; }
+.grp summary { cursor:pointer; padding:8px 0; font:600 13px var(--mono); text-transform:uppercase; letter-spacing:.1em; color:var(--accent); }
+.grp .body { padding-bottom:10px; }
+.swatches { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 6px; }
+.sw { width:26px; height:26px; padding:0; margin:0; border-radius:50%; border:2px solid #2a2218; box-shadow:none; }
+.sw.on { border-color:var(--accent); box-shadow:0 0 8px var(--accent); }
+input[type=color] { height:34px; padding:2px; }
+label.chk { display:flex; gap:8px; align-items:center; color:var(--ink); font-size:14px; }
+.btns { display:flex; flex-wrap:wrap; gap:6px; } .btns button { margin:6px 0 0; }
+.status { margin:10px 0 0; font-family:var(--mono); }
+
+/* verify */
+.vrun { display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:start; }
+.panel > h2:first-child { margin-top:0; }
+.pair { display:grid; grid-template-columns:repeat(2, 150px); gap:12px; }
+.pair figure { margin:0; } .pair canvas { width:100%; height:auto; border-radius:6px; background:#050403; }
+.pair figcaption { font-size:13px; color:var(--mute); }
+
+@media (max-width:900px) {
+  .candle-page { grid-template-columns:1fr; } .candle-col { position:static; }
+  .candle-stage { height:60vh; min-height:340px; }
+}
+@media (max-width:760px) {
+  .vrun { grid-template-columns:1fr; }
+  .home-hero { grid-template-columns:1fr; } .hero-candle { height:340px; }
+}
+main ul { max-width:84ch; }
+.vrun td.mono { overflow-wrap:anywhere; word-break:break-word; }
+.vrun table { table-layout:fixed; } .vrun th { width:38%; }
