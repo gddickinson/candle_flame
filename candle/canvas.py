@@ -83,7 +83,7 @@ class CandleCanvas(QOpenGLWidget):
         self._renderer.render(
             view, proj, eye,
             self.flame, self.smoke,
-            light_int=1.0 + eff * 1.5,
+            light_int=self.sim.light_intensity(eff),
             ambient=self.ambient,
             show_smoke=self.show_smoke,
             screen_h=float(h),

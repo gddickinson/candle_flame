@@ -10,6 +10,8 @@ export const DEFAULT_PARAMS = Object.freeze({
   max_particles: 800, max_smoke: 120, emit_rate: 12.0, smoke_rate: 1.5,
 });
 const F02 = f(0.2), F08 = f(0.8), F015 = f(0.15), F097 = f(0.97), F099 = f(0.99);
+// simulation.LIGHT_FADE_S: seconds for light and glow to fade out after Blow Out (or back in on relight)
+export const LIGHT_FADE_S = 0.9;
 const F002 = f(0.02), F004 = f(0.04), F001 = f(0.01), F006 = f(0.06);
 
 // n draws of rng.uniform(lo, hi, n): low + (high - low) * random()
@@ -141,6 +143,7 @@ export class CandleSim {
     this.smoke = new SmokeSystem(this.params.max_smoke, rands.smoke || Math.random);
     this.random = rands.flicker || Math.random;
     this.time = 0; this.emit_accum = 0; this.smoke_accum = 0;
+    this.light = this.params.intensity > 0 ? 1.0 : 0.0;   // light level following the flame
   }
 
   // Flicker floor of 0.05 while burning; intensity 0 (Blow Out) gives 0, extinguishing the flame until relit.
@@ -150,9 +153,14 @@ export class CandleSim {
     return Math.max(0.05, p.intensity * flickerMod(this.time * 1000, p.flicker, this.random()));
   }
 
+  // Point-light intensity (glow alpha derives from it): 1 + eff * 1.5 while lit, fading with the flame.
+  lightIntensity(eff) { return this.light * (1.0 + eff * 1.5); }
+
   step(dt, showSmoke = true) {
     this.time += dt;
     const p = this.params, eff = this.effectiveIntensity(), wx = p.wind_x, wz = p.wind_z;
+    const ramp = dt / LIGHT_FADE_S;
+    this.light = p.intensity > 0 ? Math.min(1.0, this.light + ramp) : Math.max(0.0, this.light - ramp);
     this.emit_accum += p.emit_rate * eff * dt * 30;
     while (this.emit_accum >= 1) { this.flame.emit(1, eff, wx, wz); this.emit_accum -= 1; }
     if (showSmoke) {

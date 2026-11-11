@@ -73,4 +73,19 @@ ok('Blow Out (intensity 0) extinguishes the flame; raising the intensity relight
   assert.equal(low.effectiveIntensity(), 0.05);
 });
 
+ok('light and glow: unchanged while lit, fade to 0 after Blow Out, return on relight', () => {
+  const sim = new CandleSim({}, { flame: rng(1), smoke: rng(2), flicker: rng(3) });
+  const burn = s => { for (let i = 0; i < Math.round(s * 60); i++) sim.step(1 / 60); };
+  burn(0.5);
+  let eff = sim.effectiveIntensity();
+  assert.equal(sim.lightIntensity(eff), 1.0 + eff * 1.5);
+  sim.params.intensity = 0; burn(0.3);
+  const mid = sim.lightIntensity(sim.effectiveIntensity());
+  assert.ok(mid > 0 && mid < 1, String(mid));
+  burn(0.7); assert.equal(sim.lightIntensity(sim.effectiveIntensity()), 0);
+  sim.params.intensity = 0.7; burn(1);
+  eff = sim.effectiveIntensity();
+  assert.equal(sim.lightIntensity(eff), 1.0 + eff * 1.5);
+});
+
 console.log(`flame_engine: ${n} tests passed`);

@@ -97,7 +97,7 @@ export class CandleView {
     const proj = perspective(45, w / h, 0.01, 50.0), view = this.camera.viewMatrix(), eye = this.camera.eye;
     const eff = this.sim.effectiveIntensity();       // paintGL: flicker modulates the point light
     if (this.gl) {
-      this.gl.render(view, proj, eye, this.sim.flame, this.sim.smoke, { lightInt: 1.0 + eff * 1.5,
+      this.gl.render(view, proj, eye, this.sim.flame, this.sim.smoke, { lightInt: this.sim.lightIntensity(eff),
         ambient: this.ambient, showSmoke: this.showSmoke, candleColor: this.candleRgb });
     } else {
       const ctx = this.ctx, mvp = matmul(proj, view);

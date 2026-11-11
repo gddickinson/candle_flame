@@ -13,6 +13,10 @@ import numpy as np
 
 from .particles import FlameParams, FlameSystem, SmokeSystem
 
+# Seconds for the candle's light and glow to fade out after Blow Out (or back in
+# on relight): the longest flame-particle life (FlameSystem.emit: 0.4 + U(0, 0.5)).
+LIGHT_FADE_S = 0.9
+
 
 def flicker_mod(t_ms: float, flicker: float, noise: float) -> float:
     """Multi-frequency flicker multiplier; *noise* is a uniform draw in [0, 1)."""
@@ -40,6 +44,8 @@ class CandleSim:
         self.time = 0.0
         self.emit_accum = 0.0
         self.smoke_accum = 0.0
+        # Light level 0..1 following the flame: 1 while lit, ramps to 0 after Blow Out
+        self.light = 1.0 if self.params.intensity > 0 else 0.0
 
     def effective_intensity(self) -> float:
         """Intensity modulated by flicker (draws one random number).
@@ -54,12 +60,27 @@ class CandleSim:
         mod = flicker_mod(self.time * 1000, p.flicker, self.random())
         return max(0.05, p.intensity * mod)
 
+    def light_intensity(self, eff: float) -> float:
+        """Point-light intensity for the renderer (the glow alpha derives from it).
+
+        ``1 + eff * 1.5`` while lit, scaled by the light level so it fades to 0
+        with the flame after Blow Out and returns on relight.
+        """
+        return self.light * (1.0 + eff * 1.5)
+
     def step(self, dt: float, show_smoke: bool = True) -> float:
         """Advance the simulation by *dt* seconds; returns the effective intensity."""
         self.time += dt
         p = self.params
         eff = self.effective_intensity()
         wx, wz, turb = p.wind_x, p.wind_z, p.turbulence
+
+        # Light level ramps towards 1 (lit) or 0 (blown out)
+        ramp = dt / LIGHT_FADE_S
+        if p.intensity > 0:
+            self.light = min(1.0, self.light + ramp)
+        else:
+            self.light = max(0.0, self.light - ramp)
 
         # Emit flame particles
         self.emit_accum += p.emit_rate * eff * dt * 30

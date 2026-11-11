@@ -22,17 +22,18 @@ const copy = (sys, fields) => Object.fromEntries(fields.map(k => [k, Float32Arra
 
 // Run case c in JS; snapshots hold Float32Array copies of the particle arrays.
 export function runCase(c, { steps = c.steps } = {}) {
-  const sim = makeSim(c), snapshots = [], eff = [];
+  const sim = makeSim(c), snapshots = [], eff = [], light = [];
   for (let i = 0; i < steps; i++) {
     Object.assign(sim.params, c.changes[String(i)] || {});
-    eff.push(sim.step(c.dt, c.show_smoke));
+    const e = sim.step(c.dt, c.show_smoke);
+    eff.push(e); light.push(sim.lightIntensity(e));
     if ((i + 1) % c.snap_every === 0) {
-      snapshots.push({ step: i + 1, time: sim.time, emit_accum: sim.emit_accum, smoke_accum: sim.smoke_accum,
+      snapshots.push({ step: i + 1, time: sim.time, emit_accum: sim.emit_accum, smoke_accum: sim.smoke_accum, light: sim.light,
         alive: [sim.flame.alive(), sim.smoke.alive()],
         flame: copy(sim.flame, FLAME_FIELDS), smoke: copy(sim.smoke, SMOKE_FIELDS) });
     }
   }
-  return { sim, snapshots, eff };
+  return { sim, snapshots, eff, light };
 }
 
 // Compare JS snapshots with the Python ones (base64). Returns max |diff|, the number of float32 values that differ
@@ -42,7 +43,7 @@ export function compare(ref, js) {
   ref.snapshots.forEach((rs, k) => {
     const s = js.snapshots[k];
     counts = counts && s.alive[0] === rs.alive[0] && s.alive[1] === rs.alive[1];
-    for (const key of ['time', 'emit_accum', 'smoke_accum']) scalars = Math.max(scalars, Math.abs(s[key] - rs[key]));
+    for (const key of ['time', 'emit_accum', 'smoke_accum', 'light']) scalars = Math.max(scalars, Math.abs(s[key] - rs[key]));
     for (const [sys, fields] of [['flame', FLAME_FIELDS], ['smoke', SMOKE_FIELDS]]) {
       for (const fld of fields) {
         const a = decodeF32(rs[sys][fld]), b = s[sys][fld];
@@ -54,6 +55,6 @@ export function compare(ref, js) {
       }
     }
   });
-  const effDiff = Math.max(...ref.eff.map((v, i) => Math.abs(v - js.eff[i])));
+  const effDiff = Math.max(...ref.eff.map((v, i) => Math.abs(v - js.eff[i])), ...ref.light.map((v, i) => Math.abs(v - js.light[i])));
   return { maxDiff, differ, total, counts, scalars, effDiff, snapshots: ref.snapshots.length };
 }

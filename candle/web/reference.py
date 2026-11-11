@@ -80,7 +80,7 @@ def _b64(a: np.ndarray) -> str:
 
 def snapshot(sim: CandleSim, step: int) -> dict:
     return {
-        "step": step, "time": sim.time, "emit_accum": sim.emit_accum, "smoke_accum": sim.smoke_accum,
+        "step": step, "time": sim.time, "emit_accum": sim.emit_accum, "smoke_accum": sim.smoke_accum, "light": sim.light,
         "alive": [int(np.sum(sim.flame.life > 0)), int(np.sum(sim.smoke.life > 0))],
         "flame": {k: _b64(getattr(sim.flame, k)) for k in FLAME_FIELDS},
         "smoke": {k: _b64(getattr(sim.smoke, k)) for k in SMOKE_FIELDS},
@@ -90,14 +90,16 @@ def snapshot(sim: CandleSim, step: int) -> dict:
 def run_case(case: dict) -> dict:
     """Run *case* through CandleSim.step; float32 particle snapshots every ``snap_every`` steps."""
     sim = make_sim(case)
-    snaps, effs = [], []
+    snaps, effs, lights = [], [], []
     for i in range(case["steps"]):
         for k, v in case["changes"].get(str(i), {}).items():
             setattr(sim.params, k, v)
-        effs.append(sim.step(case["dt"], case["show_smoke"]))
+        eff = sim.step(case["dt"], case["show_smoke"])
+        effs.append(eff)
+        lights.append(sim.light_intensity(eff))
         if (i + 1) % case["snap_every"] == 0:
             snaps.append(snapshot(sim, i + 1))
-    return {"case": case, "snapshots": snaps, "eff": effs}
+    return {"case": case, "snapshots": snaps, "eff": effs, "light": lights}
 
 
 def noise_fixture() -> dict:
