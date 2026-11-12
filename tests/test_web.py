@@ -134,7 +134,9 @@ def _close(a, b, path="$"):
         y = np.frombuffer(base64.b64decode(b), "<f4")
         assert x.shape == y.shape and np.allclose(x, y, rtol=1e-5, atol=1e-6), path
     elif isinstance(a, float) or isinstance(b, float):
-        assert abs(a - b) <= 1e-9 * max(1.0, abs(a)), (path, a, b)
+        # rtol 1e-6; the camera matrices are float32, so entries that should be 0 carry float32 round-off (~1e-8)
+        atol = 1e-6 if path.startswith("$.camera") else 1e-9
+        assert abs(a - b) <= atol + 1e-6 * abs(a), (path, a, b)
     else:
         assert a == b, (path, a, b)
 
